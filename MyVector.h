@@ -130,5 +130,5 @@ public:
 private:
     ValueType* _data = nullptr;
     size_t _size = 0;
-    size_t _capacity = 0;
+    size_t _capacity;
 };

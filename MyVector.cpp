@@ -2,11 +2,13 @@
 
 MyVector::MyVector(size_t size, ResizeStrategy, float coef) {
     _data = new ValueType[size];
+    loadFactor();
 }
 
 
 MyVector::MyVector(size_t size, ValueType value, ResizeStrategy, float coef) {
     _data = new ValueType[size];
+    loadFactor();
 }
 
 MyVector::MyVector(const MyVector& copy) {
@@ -41,6 +43,15 @@ size_t MyVector:: size() const {
 }
 
 float MyVector:: loadFactor() {
+    if (_size/_capacity > 1) {
+        _capacity /= 2*_capacity;
+    }
+    else if (_size/_capacity == 1/4) {
+        _capacity /= _capacity/2;
+    }
+    else if (_size == 0) {
+        _capacity = 1;
+    }
     return _size/_capacity;
 }
 
@@ -69,6 +80,7 @@ void MyVector:: pushBack(const ValueType& value) {
     delete[] _data;
     this->_data = puVector;
     this->_size += 1;
+    loadFactor();
 }
 
 void MyVector:: insert(const size_t i, const ValueType& value) {
@@ -80,6 +92,7 @@ void MyVector:: insert(const size_t i, const ValueType& value) {
     this->_data = inVector;
     _data[i] = value;
     this->_size += 1;
+    loadFactor();
 }
 
 void MyVector:: insert(const size_t i, const MyVector& value) {
@@ -100,6 +113,7 @@ void MyVector:: insert(const size_t i, const MyVector& value) {
     delete[] _data;
     this->_data = inVector;
     this->_size += value.size();
+    loadFactor();
 }
 
 
@@ -111,6 +125,7 @@ void MyVector:: popBack() {
     delete[] _data;
     this->_data = popVector;
     this->_size -= 1;
+    loadFactor();
 }
 
 void MyVector:: erase(const size_t i) {
@@ -124,6 +139,7 @@ void MyVector:: erase(const size_t i) {
     delete[] _data;
     this->_data = erVector;
     this->_size -= 1;
+    loadFactor();
 }
 
 void MyVector:: erase(const size_t i, const size_t len) {
@@ -137,6 +153,7 @@ void MyVector:: erase(const size_t i, const size_t len) {
     delete[] _data;
     this->_data = erVector2;
     this->_size -= len;
+    loadFactor();
 }
 
 long long int MyVector:: find(const ValueType& value, bool isBegin) const {
@@ -181,6 +198,7 @@ void MyVector:: resize(const size_t size, const ValueType) {
         this->_data = reVector;
         this->_size = size;
     }
+    loadFactor();
 }
 
 void MyVector:: clear() {
@@ -192,10 +210,3 @@ void MyVector:: print() {
         std::cout<<_data[i]<<std::endl;
     }
 }
-
-
-
-
-
-
-
