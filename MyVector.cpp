@@ -43,11 +43,14 @@ size_t MyVector:: size() const {
 }
 
 float MyVector:: loadFactor() {
-    if (_size/_capacity > 1) {
-        _capacity /= 2*_capacity;
+    if (_capacity == 0) {
+        _capacity = 1;
+    }
+    else if (_size/_capacity > 1) {
+        _capacity = 2*_capacity;
     }
     else if (_size/_capacity == 1/4) {
-        _capacity /= _capacity/2;
+        _capacity = _capacity/2;
     }
     else if (_size == 0) {
         _capacity = 1;
@@ -210,3 +213,4 @@ void MyVector:: print() {
         std::cout<<_data[i]<<std::endl;
     }
 }
+
