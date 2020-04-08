@@ -1,14 +1,18 @@
 #include "MyVector.h"
 
 MyVector::MyVector(size_t size, ResizeStrategy, float coef) {
-    _data = new ValueType[size];
-    loadFactor();
+    _capacity = 1;
+    _data = new ValueType[_capacity];
 }
 
 
 MyVector::MyVector(size_t size, ValueType value, ResizeStrategy, float coef) {
-    _data = new ValueType[size];
-    loadFactor();
+    _capacity = 1;
+    _data = new ValueType[_capacity];
+    _size = size;
+    if (_size/_capacity > 1) {
+        _capacity = 2*_capacity;
+    }
 }
 
 MyVector::MyVector(const MyVector& copy) {
@@ -18,13 +22,14 @@ MyVector::MyVector(const MyVector& copy) {
 }
 
 MyVector& MyVector::operator=(const MyVector& copy) {
-    ValueType* eqVector = new ValueType[copy._size];
+    ValueType* eqVector = new ValueType[copy._capacity];
     for (size_t i = 0; i<_size; i++) {
         eqVector[i] = copy._data[i];
     }
     delete[] _data;
     this->_data = eqVector;
     this->_size = copy._size;
+    this->_capacity = copy._capacity;
     return *this;
 }
 
@@ -43,18 +48,6 @@ size_t MyVector:: size() const {
 }
 
 float MyVector:: loadFactor() {
-    if (_capacity == 0) {
-        _capacity = 1;
-    }
-    else if (_size/_capacity > 1) {
-        _capacity = 2*_capacity;
-    }
-    else if (_size/_capacity == 1/4) {
-        _capacity = _capacity/2;
-    }
-    else if (_size == 0) {
-        _capacity = 1;
-    }
     return _size/_capacity;
 }
 
@@ -75,7 +68,7 @@ ValueType& MyVector:: operator[](const size_t i) const {
 }
 
 void MyVector:: pushBack(const ValueType& value) {
-    ValueType* puVector = new ValueType[_size+1];
+    ValueType* puVector = new ValueType[_capacity+1];
     for (size_t i = 0; i<_size; i++) {
         puVector[i] = _data[i];
     }
@@ -83,11 +76,11 @@ void MyVector:: pushBack(const ValueType& value) {
     delete[] _data;
     this->_data = puVector;
     this->_size += 1;
-    loadFactor();
+    this->_capacity += 1;
 }
 
 void MyVector:: insert(const size_t i, const ValueType& value) {
-    auto inVector = new ValueType[_size+i];
+    auto inVector = new ValueType[_capacity+1];
     for (auto idx = 0; idx < _size; ++idx) {
         inVector[idx] = _data[idx];
     }
@@ -95,11 +88,11 @@ void MyVector:: insert(const size_t i, const ValueType& value) {
     this->_data = inVector;
     _data[i] = value;
     this->_size += 1;
-    loadFactor();
+    this->_capacity += 1;
 }
 
 void MyVector:: insert(const size_t i, const MyVector& value) {
-    auto inVector = new ValueType[_size+value.size()];
+    auto inVector = new ValueType[_capacity+value.size()];
     for (auto idx = 0; idx<i; ++idx) {
         inVector[idx] = _data[idx];
     }
@@ -116,23 +109,23 @@ void MyVector:: insert(const size_t i, const MyVector& value) {
     delete[] _data;
     this->_data = inVector;
     this->_size += value.size();
-    loadFactor();
+    this->_capacity += value.size();
 }
 
 
 void MyVector:: popBack() {
-    ValueType* popVector = new ValueType[_size-1];
+    ValueType* popVector = new ValueType[_capacity-1];
     for (size_t i = 0; i<_size-1; i++) {
         popVector[i] = _data[i];
     }
     delete[] _data;
     this->_data = popVector;
     this->_size -= 1;
-    loadFactor();
+    this->_capacity -= 1;
 }
 
 void MyVector:: erase(const size_t i) {
-    ValueType* erVector = new ValueType[_size-1];
+    ValueType* erVector = new ValueType[_capacity-1];
     for (size_t j = 0; j<i; j++) {
         erVector[j] = _data[j];
     }
@@ -142,11 +135,11 @@ void MyVector:: erase(const size_t i) {
     delete[] _data;
     this->_data = erVector;
     this->_size -= 1;
-    loadFactor();
+    this->_capacity -= 1;
 }
 
 void MyVector:: erase(const size_t i, const size_t len) {
-    ValueType* erVector2 = new ValueType[_size-len];
+    ValueType* erVector2 = new ValueType[_capacity-len];
     for (size_t j = 0; j<i; j++) {
         erVector2[j] = _data[j];
     }
@@ -156,7 +149,7 @@ void MyVector:: erase(const size_t i, const size_t len) {
     delete[] _data;
     this->_data = erVector2;
     this->_size -= len;
-    loadFactor();
+    this->_capacity -= len;
 }
 
 long long int MyVector:: find(const ValueType& value, bool isBegin) const {
@@ -179,6 +172,13 @@ long long int MyVector:: find(const ValueType& value, bool isBegin) const {
 
 void MyVector:: reserve(const size_t capacity) {
     _capacity = capacity;
+    ValueType* resVector = new ValueType[_capacity];
+    for (size_t i = 0; i<_size; i++) {
+        resVector[i] = _data[i];
+    }
+    delete[] _data;
+    this->_data = resVector;
+    this->_size = _capacity;
 }
 
 
@@ -201,7 +201,7 @@ void MyVector:: resize(const size_t size, const ValueType) {
         this->_data = reVector;
         this->_size = size;
     }
-    loadFactor();
+    this->_capacity = size;
 }
 
 void MyVector:: clear() {
@@ -213,4 +213,3 @@ void MyVector:: print() {
         std::cout<<_data[i]<<std::endl;
     }
 }
-
