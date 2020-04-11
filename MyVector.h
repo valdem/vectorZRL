@@ -19,8 +19,8 @@ using ValueType = double;
 class MyVector
 {
 public:
-    MyVector(size_t size = 0, ResizeStrategy = ResizeStrategy::Multiplicative, float coef = 1.5f);
-    MyVector(size_t size, ValueType value, ResizeStrategy = ResizeStrategy::Multiplicative, float coef = 1.5f);
+    MyVector(size_t size = 0, ResizeStrategy strategy = ResizeStrategy::Multiplicative, float coef = 1.5f);
+    MyVector(size_t size, ValueType value, ResizeStrategy strategy = ResizeStrategy::Multiplicative, float coef = 1.5f);
     
     MyVector(const MyVector& copy);
     MyVector& operator=(const MyVector& copy);
@@ -39,12 +39,27 @@ public:
         iterator(const MyVector* vector, int index):iVector(),index(){
             
         }
-        const ValueType operator*() const {
+        const ValueType& operator*() const {
+            return iVector->operator[](index);
+        }
+        ValueType& operator*() {
+            return iVector->operator[](index);
+        }
+        const ValueType operator->() const{
+            return iVector->operator[](index);
+        }
+        ValueType operator->() {
             return iVector->operator[](index);
         }
         iterator &operator++() {
             ++index;
             return *this;
+        }
+        bool operator!=(const iterator& other) {
+            return index != other.index;
+        }
+        bool operator==(const iterator& other) {
+            return index == other.index;
         }
     private:
         const MyVector* iVector;

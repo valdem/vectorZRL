@@ -1,30 +1,55 @@
 #include "MyVector.h"
 
-MyVector::MyVector(size_t size, ResizeStrategy, float coef) {
-    _capacity = 1;
-    _data = new ValueType[_capacity];
+MyVector::MyVector(size_t size, ResizeStrategy strategy, float coef) {
+    switch (strategy) {
+        case ResizeStrategy::Additive:
+            _capacity = size+coef;
+            _data = new ValueType[_capacity];
+            _size = size;
+        break;
+        case ResizeStrategy::Multiplicative:
+            _capacity = size*coef;
+            _data = new ValueType[_capacity];
+            _size = size;
+        break;
+    }
 }
 
 
-MyVector::MyVector(size_t size, ValueType value, ResizeStrategy, float coef) {
-    _capacity = 1;
-    _data = new ValueType[_capacity];
-    _size = size;
-    if (_size/_capacity > 1) {
-        _capacity = 2*_capacity;
+MyVector::MyVector(size_t size, ValueType value, ResizeStrategy strategy, float coef) {
+    switch (strategy) {
+        case ResizeStrategy::Additive:
+            _capacity = size+coef;
+            _data = new ValueType[_capacity];
+            _size = size;
+            for (size_t i = 0; i<_size; i++) {
+                _data[i] = value;
+            }
+        break;
+        case ResizeStrategy::Multiplicative:
+            _capacity = size*coef;
+            _data = new ValueType[_capacity];
+            _size = size;
+            for (size_t i = 0; i<_size; i++) {
+                _data[i] = value;
+            }
+        break;
     }
 }
 
 MyVector::MyVector(const MyVector& copy) {
-    for (int i = 0; i<_size; i++) {
-        _data[i] = copy._data[i];
+    for (size_t i = 0; i<_size; i++) {
+        _data[i] = copy[i];
     }
+    this->_data = copy._data;
+    this->_size = copy._size;
+    this->_capacity = copy._capacity;
 }
 
 MyVector& MyVector::operator=(const MyVector& copy) {
     ValueType* eqVector = new ValueType[copy._capacity];
     for (size_t i = 0; i<_size; i++) {
-        eqVector[i] = copy._data[i];
+        eqVector[i] = copy[i];
     }
     delete[] _data;
     this->_data = eqVector;
@@ -34,7 +59,6 @@ MyVector& MyVector::operator=(const MyVector& copy) {
 }
 
 MyVector::~MyVector() {
-    delete _data;
     _size = 0;
     _capacity = 0;
 }
@@ -171,25 +195,30 @@ long long int MyVector:: find(const ValueType& value, bool isBegin) const {
 }
 
 void MyVector:: reserve(const size_t capacity) {
-    _capacity = capacity;
-    ValueType* resVector = new ValueType[_capacity];
-    for (size_t i = 0; i<_size; i++) {
-        resVector[i] = _data[i];
+    if (capacity<_capacity) {
+        this->resize(capacity);
     }
-    delete[] _data;
-    this->_data = resVector;
-    this->_size = _capacity;
+    else {
+        this->_capacity = capacity;
+        ValueType* resVector = new ValueType[_capacity];
+        for (size_t i = 0; i<_size; i++) {
+            resVector[i] = _data[i];
+        }
+        delete[] _data;
+        this->_data = resVector;
+    }
 }
 
 
 void MyVector:: resize(const size_t size, const ValueType) {
-    if (size>_size) {
+    if (size>_capacity) {
         ValueType* reVector = new ValueType[size];
         for (size_t i = 0; i<_size; i++) {
             reVector[i] = _data[i];
         }
         delete[] _data;
         this->_data = reVector;
+        this->_capacity = size;
         this->_size = size;
     }
     else {
@@ -200,8 +229,8 @@ void MyVector:: resize(const size_t size, const ValueType) {
         delete[] _data;
         this->_data = reVector;
         this->_size = size;
+        this->_capacity = size;
     }
-    this->_capacity = size;
 }
 
 void MyVector:: clear() {
