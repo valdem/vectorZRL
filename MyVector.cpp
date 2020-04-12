@@ -59,6 +59,8 @@ MyVector& MyVector::operator=(const MyVector& copy) {
 }
 
 MyVector::~MyVector() {
+    _data = nullptr;
+    delete _data;
     _size = 0;
     _capacity = 0;
 }
